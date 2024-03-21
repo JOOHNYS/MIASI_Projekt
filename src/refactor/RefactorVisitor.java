@@ -3,12 +3,19 @@ package refactor;
 import grammar.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
     private final CharStream input;
-    public RefactorVisitor(CharStream input) {
+    private final RefactorConfig config;
+    public RefactorVisitor(CharStream input, RefactorConfig config) {
         super();
         this.input = input;
+        this.config = config;
     }
 
     private String getText(ParserRuleContext ctx) {
@@ -20,9 +27,12 @@ public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
 
     @Override
     public String visitLiteralExpression(JavaScriptParser.LiteralExpressionContext ctx) {
-        System.out.println("LiteralExpression: " + getText(ctx));
-        // check if the literal is a string
-        return "StringLiteral";
-
+        if(ctx.literal().StringLiteral()!=null) {
+            String text = ctx.literal().StringLiteral().getText();
+            String modifiedText = this.config.getQuote() + text.substring(1, text.length() - 1) + this.config.getQuote();
+            TerminalNode newNode = new TerminalNodeImpl(new CommonToken(JavaScriptParser.StringLiteral, modifiedText));
+            ctx.children = new ArrayList<>(Collections.singletonList(newNode));
+        }
+        return super.visitLiteralExpression(ctx);
     }
 }
