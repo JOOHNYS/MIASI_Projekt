@@ -2,6 +2,7 @@ package refactor;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Properties;
 
 public class RefactorConfig {
@@ -14,13 +15,15 @@ public class RefactorConfig {
         try (FileInputStream in = new FileInputStream("config.yaml")) {
             prop.load(in);
             String quote = prop.getProperty("quote");
-            if (quote.equals("\"") || quote.equals("'")) {
-                this.quote = quote;
+            if (Objects.equals(quote, "\"single\"")) {
+                this.quote = "'";
+            } else if (Objects.equals(quote, "\"double\"")) {
+                this.quote = "\"";
             } else {
-                throw new IllegalArgumentException("Invalid quote character in config file. It should be either \" or '");
+                System.out.println("Invalid quote value in config.yaml");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
