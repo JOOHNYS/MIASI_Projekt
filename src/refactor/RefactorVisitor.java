@@ -27,12 +27,16 @@ public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
 
     @Override
     public String visitLiteralExpression(JavaScriptParser.LiteralExpressionContext ctx) {
+        this.refactorQuotes(ctx);
+        return super.visitLiteralExpression(ctx);
+    }
+
+    private void refactorQuotes(JavaScriptParser.LiteralExpressionContext ctx) {
         if(ctx.literal().StringLiteral()!=null) {
             String text = ctx.literal().StringLiteral().getText();
             String modifiedText = this.config.getQuote() + text.substring(1, text.length() - 1) + this.config.getQuote();
             TerminalNode newNode = new TerminalNodeImpl(new CommonToken(JavaScriptParser.StringLiteral, modifiedText));
             ctx.children = new ArrayList<>(Collections.singletonList(newNode));
         }
-        return super.visitLiteralExpression(ctx);
     }
 }
