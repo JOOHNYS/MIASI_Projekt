@@ -12,10 +12,13 @@ import java.util.Collections;
 public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
     private final CharStream input;
     private final RefactorConfig config;
-    public RefactorVisitor(CharStream input, RefactorConfig config) {
+    public TokenStreamRewriter rewriter;
+
+    public RefactorVisitor(CharStream input, RefactorConfig config, CommonTokenStream tokens) {
         super();
         this.input = input;
         this.config = config;
+        this.rewriter = new TokenStreamRewriter(tokens);
     }
 
     private String getText(ParserRuleContext ctx) {
@@ -36,7 +39,8 @@ public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
             String text = ctx.literal().StringLiteral().getText();
             String modifiedText = this.config.getQuote() + text.substring(1, text.length() - 1) + this.config.getQuote();
             TerminalNode newNode = new TerminalNodeImpl(new CommonToken(JavaScriptParser.StringLiteral, modifiedText));
-            ctx.children = new ArrayList<>(Collections.singletonList(newNode));
+            //ctx.children = new ArrayList<>(Collections.singletonList(newNode));
+            this.rewriter.replace(ctx.start, ctx.stop, modifiedText);
         }
     }
 }

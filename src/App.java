@@ -1,7 +1,6 @@
 import grammar.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import refactor.RefactorConfig;
 import refactor.RefactorVisitor;
@@ -9,8 +8,6 @@ import refactor.RefactorVisitor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class App {
     public static void main(String[] args) {
@@ -28,12 +25,11 @@ public class App {
         RefactorConfig config = new RefactorConfig();
         config.readConfig();
 
-        RefactorVisitor visitor = new RefactorVisitor(inp, config);
+        RefactorVisitor visitor = new RefactorVisitor(inp, config, tokens);
         visitor.visit(tree); // Refactor the code
 
-        String modifiedCode = reconstructCode(tree, lexer);
         try (PrintWriter writer = new PrintWriter("output.js")) {
-            writer.println(modifiedCode);
+            writer.println(visitor.rewriter.getText());
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
