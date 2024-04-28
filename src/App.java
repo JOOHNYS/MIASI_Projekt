@@ -35,37 +35,4 @@ public class App {
         }
 
     }
-
-    // Reconstruct code from parse tree
-    private static String reconstructCode(ParseTree tree, Lexer lexer) {
-        StringBuilder codeBuilder = new StringBuilder();
-        for (int i = 0; i < tree.getChildCount(); i++) {
-            ParseTree child = tree.getChild(i);
-            codeBuilder.append(getNodeText(child, lexer));
-        }
-        return codeBuilder.toString();
-    }
-
-    // Get text representation of a parse tree node
-    private static String getNodeText(ParseTree node, Lexer lexer) {
-        if (node instanceof TerminalNode) {
-            Token symbol = ((TerminalNode) node).getSymbol();
-            // Exclude <EOF> token
-            if (symbol.getType() != Token.EOF) {
-                return symbol.getText();
-            }
-        } else {
-            StringBuilder text = new StringBuilder();
-            for (int i = 0; i < node.getChildCount(); i++) {
-                ParseTree child = node.getChild(i);
-                text.append(getNodeText(child, lexer));
-            }
-            // Append newline if the node is a statement
-            if (node instanceof JavaScriptParser.StatementContext) {
-                text.append("\n");
-            }
-            return text.toString();
-        }
-        return "";
-    }
 }
