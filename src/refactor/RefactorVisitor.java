@@ -40,6 +40,55 @@ public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
         this.refactorTemplateString(ctx);
         return super.visitLiteralExpression(ctx);
     }
+        @Override
+    public String visitImportStatement(JavaScriptParser.ImportStatementContext ctx) {
+        this.refactorImport(ctx);
+        return super.visitImportStatement(ctx);
+    }
+
+    private void refactorImport (JavaScriptParser.ImportStatementContext ctx) {
+        // Detect import type (simple/from import)
+        var importBody = ctx.importFromBlock();
+        if (importBody.importFrom() == null) {
+            handleSimpleImport(ctx);
+        } else {
+            handleFromImport(ctx);
+        }
+    }
+
+    private void handleSimpleImport(JavaScriptParser.ImportStatementContext ctx) {
+        System.out.println("Refactoring simple import");
+        // Replace import 'module' with require('module');
+        String text = ctx.getText();
+        String modifiedText = text.replace("import", "require(") + ");";
+        this.rewriter.replace(ctx.start, ctx.stop, modifiedText);
+    }
+
+    private void handleFromImport(JavaScriptParser.ImportStatementContext ctx) {
+        System.out.println("Refactoring from import");
+        // Get import body and extract module and identifiers
+        var importBody = ctx.importFromBlock();
+        var newImport = new StringBuilder();
+        var importModule = importBody.importFrom().StringLiteral().getText();
+
+        // Handle potential default import ( import defaultIdentifier, namedIdentifier from 'module'; )
+        if (importBody.importDefault() != null) {
+            var defaultIdentifier = importBody.importDefault().aliasName().identifierName().get(0).getText();
+            newImport.append("const ")
+                    .append(defaultIdentifier)
+                    .append(" = require(")
+                    .append(importModule)
+                    .append(");\n");
+        }
+        // Handle named identifier
+        var namedIdentifier = importBody.importNamespace().identifierName().get(0).getText();
+        newImport.append("const { ")
+                .append(namedIdentifier)
+                .append(" } = require(")
+                .append(importModule)
+                .append(");");
+        this.rewriter.replace(ctx.start, ctx.stop, newImport.toString());
+    }
 
     private void refactorQuotes(JavaScriptParser.LiteralExpressionContext ctx) {
         if (ctx.literal().StringLiteral() != null) {
