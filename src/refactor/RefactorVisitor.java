@@ -37,6 +37,7 @@ public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
     @Override
     public String visitLiteralExpression(JavaScriptParser.LiteralExpressionContext ctx) {
         this.refactorQuotes(ctx);
+        this.refactorTemplateString(ctx);
         return super.visitLiteralExpression(ctx);
     }
 
@@ -61,6 +62,15 @@ public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
             String modifiedText = String.join(", ", arguments);
             rewriter.replace(ctx.formalParameterList().start, ctx.formalParameterList().stop, modifiedText);
         }
-
+    }
+    private void refactorTemplateString(JavaScriptParser.LiteralExpressionContext ctx) {
+    if (ctx.literal().StringLiteral() != null) {
+        String text = ctx.literal().StringLiteral().getText();
+        if (text.startsWith("`") && text.endsWith("`")) {
+            String content = text.substring(1, text.length() - 1);
+            content = content.replaceAll("\\$\\{([^}]*)\\}", "\" + $1 + \"");
+            String modifiedText = "\"" + content + "\"";
+            this.rewriter.replace(ctx.start, ctx.stop, modifiedText);
+        }
     }
 }
