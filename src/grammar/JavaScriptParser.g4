@@ -121,6 +121,14 @@ importFrom
     : From StringLiteral
     ;
 
+custom_parse: custom_statement+;
+
+custom_statement: custom_declaration | custom_expression;
+
+custom_declaration: 'var' VARNAME ';' -> ^(VARNAME VARNAME);
+
+custom_expression: VARNAME;
+
 aliasName
     : identifierName (As identifierName)?
     ;
