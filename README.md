@@ -12,4 +12,8 @@ Modelowania i analiza systemów informatycznych - projekt numer 1
 - sortowanie alfabetyczne parametrów funkcji
 
   **JAK ODPALIĆ?**
-- pobrać 
+- pobrać jako folder skompresowany
+- wypakować
+- operować na pliku _JavaApp_ korzystając z odpowiednich funkcjonalności
+
+  // 08.05.2024
