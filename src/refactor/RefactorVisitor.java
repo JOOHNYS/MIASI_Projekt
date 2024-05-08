@@ -40,10 +40,29 @@ public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
         this.refactorTemplateString(ctx);
         return super.visitLiteralExpression(ctx);
     }
-        @Override
+    
+    @Override
     public String visitImportStatement(JavaScriptParser.ImportStatementContext ctx) {
         this.refactorImport(ctx);
         return super.visitImportStatement(ctx);
+    }
+
+    @Override
+    public Void visitDeclaration(JavaScriptParser.DeclarationContext ctx) {
+        ParseTree variableNode = ctx.VARNAME(0);
+        String originalName = variableNode.getText();
+        String transformedName = transformVariableName(originalName);
+        variableNode.getPayload().setText(transformedName);
+        return super.visitDeclaration(ctx);
+    }
+
+     @Override
+    public Void visitExpression(JavaScriptParser.ExpressionContext ctx) {
+        ParseTree variableNode = ctx.VARNAME();
+        String originalName = variableNode.getText();
+        String transformedName = transformVariableName(originalName);
+        variableNode.getPayload().setText(transformedName);
+        return super.visitExpression(ctx);
     }
 
     private void refactorImport (JavaScriptParser.ImportStatementContext ctx) {
@@ -112,6 +131,7 @@ public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
             rewriter.replace(ctx.formalParameterList().start, ctx.formalParameterList().stop, modifiedText);
         }
     }
+    
     private void refactorTemplateString(JavaScriptParser.LiteralExpressionContext ctx) {
     if (ctx.literal().StringLiteral() != null) {
         String text = ctx.literal().StringLiteral().getText();
@@ -120,6 +140,16 @@ public class RefactorVisitor extends JavaScriptParserBaseVisitor<String> {
             content = content.replaceAll("\\$\\{([^}]*)\\}", "\" + $1 + \"");
             String modifiedText = "\"" + content + "\"";
             this.rewriter.replace(ctx.start, ctx.stop, modifiedText);
+            }
         }
+    }
+
+    private String transformVariableName(String name) {
+        String[] parts = name.split("_");
+        StringBuilder result = new StringBuilder();
+        for (String part : parts) {
+            result.append(part.substring(0, 1).toUpperCase()).append(part.substring(1));
+        }
+        return result.toString();
     }
 }
