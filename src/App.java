@@ -28,6 +28,9 @@ public class App {
         RefactorVisitor visitor = new RefactorVisitor(inp, config, tokens);
         visitor.visit(tree); // Refactor the code
 
+        CaseSensitiveVariableVisitor visitor = new CaseSensitiveVariableVisitor();
+        visitor.visit(parseContext);
+
         try (PrintWriter writer = new PrintWriter("output.js")) {
             writer.println(visitor.rewriter.getText());
         } catch (FileNotFoundException e) {
