@@ -21,4 +21,3 @@ Program refactoruje kod z pliku _input.js_, a kod zrefactorowany zapisuje do pli
 - wypakować
 - operować na pliku _JavaApp_ korzystając z odpowiednich funkcjonalności
 
-  // 08.05.2024
