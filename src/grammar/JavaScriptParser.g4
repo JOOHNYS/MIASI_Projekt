@@ -70,6 +70,8 @@ statement
     | throwStatement
     | tryStatement
     | debuggerStatement
+    | declaration
+    | expression
     ;
 
 block
@@ -121,13 +123,13 @@ importFrom
     : From StringLiteral
     ;
 
-custom_parse: custom_statement+;
+parse
+    : statement+
+    ;
 
-custom_statement: custom_declaration | custom_expression;
-
-custom_declaration: 'var' VARNAME ';' -> ^(VARNAME VARNAME);
-
-custom_expression: VARNAME;
+expression
+    : VARNAME
+    ;
 
 aliasName
     : identifierName (As identifierName)?
@@ -155,6 +157,7 @@ declaration
     : variableStatement
     | classDeclaration
     | functionDeclaration
+    | 'var' VARNAME ';' -> ^(VARNAME VARNAME)
     ;
 
 variableStatement
